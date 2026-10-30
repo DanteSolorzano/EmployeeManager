@@ -32,9 +32,6 @@ export class EmployeeList implements OnInit {
   protected employees = signal<GetEmployeeResponse[]>([]);
   protected employeeService = inject(EmployeeService);
 
-  protected data = inject<{employeeId?: number}>(MAT_DIALOG_DATA{optional: true});
-  protected isEditMode = signal<boolean>(false)
-
 
   private loadEmployees(): void {
     this.employeeService.getAll().subscribe({

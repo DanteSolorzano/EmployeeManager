@@ -1,7 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import {
   MatDialogRef,
-  MatDialogModule
+  MatDialogModule,
+  MAT_DIALOG_DATA
 } from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
@@ -12,7 +13,7 @@ import { form, required, FormField } from '@angular/forms/signals';
 import { GetDepartmentResponse } from '../../interfaces/department-dtos';
 import { DepartmentService } from '../../services/department-service';
 import { EmployeeService } from '../../services/employee-service';
-import { CreateEmployeeRequest } from '../../interfaces/employee-dtos';
+import { CreateEmployeeRequest, UpdateEmployeeRequest } from '../../interfaces/employee-dtos';
 
 @Component({
   imports: [MatDialogModule, MatSelectModule, MatInputModule, MatFormFieldModule, MatButtonModule, MatIconModule, FormField],
@@ -49,11 +50,35 @@ export class EmployeeAddEdit implements OnInit {
 
   protected dialogRef = inject(MatDialogRef<EmployeeAddEdit>)
 
+  protected data = inject<{employeeId?: number}>(MAT_DIALOG_DATA, {optional: true});
+  protected isEditMode = signal<boolean>(false)
+
   ngOnInit(): void {
     this.departmentService.getAll().subscribe({
-      next: resp => this.departments.set(resp),
+      next: resp => {
+        this.departments.set(resp)
+        
+        if(this.data?.employeeId){
+          this.isEditMode.set(true)
+          this.employeeService.getbyId(this.data.employeeId).subscribe({
+            next:(employee) =>{
+              this.employeeModel.set({
+                name: employee.name,
+                lastname1: employee.lastname1,
+                lastname2: employee.lastname2,
+                email: employee.email,
+                salary: employee.salary.toString(),
+                departmentId: employee.departmentId.toString()
+              })
+            },
+            error:(e) => console.log(e.error)
+          })
+        }
+      },
       error: (e) => console.log(e.error)
     })
+
+
   }
 
   onFileSelected(event:Event):void{
@@ -66,21 +91,46 @@ export class EmployeeAddEdit implements OnInit {
   save():void {
     const {name, lastname1, lastname2, email, salary, departmentId} =  this.employeeForm().value()
 
-    const request :CreateEmployeeRequest = {
-      name,
-      lastname1,
-      lastname2,
-      email,
-      salary: Number(salary),
-      departmentId: Number(departmentId)
-    }
-    if(this.selectedFile()) request.image = this.selectedFile()!;
+      if(this.isEditMode()){
+          const request :UpdateEmployeeRequest = {
+          employeeId: this.data!.employeeId!,
+          name,
+          lastname1,
+          lastname2,
+          email,
+          salary: Number(salary),
+          departmentId: Number(departmentId)
+        }
+        if(this.selectedFile()) request.image = this.selectedFile()!;
 
-    this.employeeService.create(request).subscribe({
-      next: resp => this.dialogRef.close(true),
-      error: (e) => console.log(e.error)
-    })
+        this.employeeService.update(request).subscribe({
+          next: resp => this.dialogRef.close(true),
+          error: (e) => console.log(e.error)
+        })
+      } else {
+        const request :CreateEmployeeRequest = {
+        name,
+        lastname1,
+        lastname2,
+        email,
+        salary: Number(salary),
+        departmentId: Number(departmentId)
+      }
+      if(this.selectedFile()) request.image = this.selectedFile()!;
+
+      this.employeeService.create(request).subscribe({
+        next: resp => this.dialogRef.close(true),
+        error: (e) => console.log(e.error)
+      })
+    }
+
   }
+
+
+
+
+
+    
 
   close():void {
     this.dialogRef.close(false)

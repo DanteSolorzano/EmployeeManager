@@ -13,8 +13,8 @@ export class EmployeeService {
         return this.http.get<GetEmployeeResponse[]>(`${this.endPoint}/getAll`)
     } 
 
-    getbyId(id:number): Observable<GetEmployeeResponse[]>{
-        return this.http.get<GetEmployeeResponse[]>(`${this.endPoint}/getById/${id}`)
+    getbyId(id:number): Observable<GetEmployeeResponse>{
+        return this.http.get<GetEmployeeResponse>(`${this.endPoint}/getById/${id}`)
     } 
 
     create(request: CreateEmployeeRequest): Observable<void>{
