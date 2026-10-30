@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>New Employee</h2>
+
+<mat-dialog-content>
+    <!-- Cuadrícula responsiva: 1 columna en móviles, 2 columnas en pantallas más grandes -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 overflow-hidden">
+        
+        <!-- Nombre ocupando todo el ancho (2 columnas) -->
+        <mat-form-field appearance="outline" class="sm:col-span-2">
+            <mat-label>Name</mat-label>
+            <input matInput [formField]="employeeForm.name">
+        </mat-form-field>
+        
+        <!-- Apellidos divididos en 2 columnas -->
+        <mat-form-field appearance="outline">
+            <mat-label>First LastName</mat-label>
+            <input matInput [formField]="employeeForm.lastname1">
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+            <mat-label>Second LastName</mat-label>
+            <input matInput [formField]="employeeForm.lastname2">
+        </mat-form-field>
+        
+        <!-- Email ocupando todo el ancho -->
+        <mat-form-field appearance="outline" class="sm:col-span-2">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" [formField]="employeeForm.email">
+        </mat-form-field>
+        
+        <!-- Salario y Departamento en la misma fila -->
+        <mat-form-field appearance="outline">
+            <mat-label>Salary</mat-label>
+            <input matInput type="number" [formField]="employeeForm.salary">
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+            <mat-label>Department</mat-label>
+            <mat-select [formField]="employeeForm.departmentId">
+                @for(item of departments(); track $index){
+                 <mat-option value="{{item.id}}">{{item.name}}</mat-option>
+
+                }
+            </mat-select>
+        </mat-form-field>
+        
+        <!-- Botón de imagen ocupando todo el ancho -->
+        <div class="sm:col-span-2 pt-2">
+            <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)">
+            <button mat-flat-button class="w-full" type="button" (click)="fileInput.click()">
+                <mat-icon>upload</mat-icon>
+                {{selectedFile()?.name ?? 'Select photo'}}
+            </button>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button="outlined" (click)="close()">
+      <mat-icon>close</mat-icon>
+      Close
+  </button>
+  <button [disabled]="employeeForm().invalid()" mat-flat-button [mat-dialog-close]="true" color="primary" (click)="save()">
+    <mat-icon>save</mat-icon>
+    Save</button>
+</mat-dialog-actions>

@@ -1,0 +1,9 @@
+@use '@angular/material' as mat;
+
+// Customize the entire app. Change :root to your selector if you want to scope the styles.
+:host {
+  @include mat.toolbar-overrides((
+    container-background-color: rgb(0, 140, 255),
+    container-text-color: rgb(255, 255, 255),
+  ));
+}

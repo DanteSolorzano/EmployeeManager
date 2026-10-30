@@ -1,0 +1,32 @@
+@EmployeeApi_HostAddress = http://localhost:5119
+
+
+GET {{EmployeeApi_HostAddress}}/api/department/getAll
+
+###
+
+POST {{EmployeeApi_HostAddress}}/api/employee/create
+
+###
+
+GET {{EmployeeApi_HostAddress}}/api/department/getAll
+
+###
+
+GET {{EmployeeApi_HostAddress}}/api/employee/getAll
+
+###
+
+@id=1
+GET {{EmployeeApi_HostAddress}}/api/employee/getById?id={{id}}
+
+###
+
+PUT {{EmployeeApi_HostAddress}}/api/employee/update
+
+###
+
+@EmployeeId=0
+DELETE {{EmployeeApi_HostAddress}}/api/employee/delete/{{EmployeeId}}
+
+###
