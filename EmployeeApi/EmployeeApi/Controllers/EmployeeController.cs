@@ -24,6 +24,8 @@ namespace EmployeeApi.Controllers
         #region Helper methods
            private async Task<string> SaveImageAsync(IFormFile imageFile)
         {
+            if (imageFile == null || imageFile.Length == 0) return "";
+            
             string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
 
             string uploadsFolder = Path.Combine(_env.WebRootPath, "images");

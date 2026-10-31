@@ -3,11 +3,8 @@
             <h2 class="text-2xl font-bold text-gray-800">Employee list</h2>        
             <button matButton="filled" (click)="openCreateModal()">
             <mat-icon>add</mat-icon>
-            @if(isEditMode()){
-                Edit Employee
-            } @else {
-              New Employee
-            }</button>
+            New Employee
+            </button>
 
     </div>
 
@@ -59,7 +56,7 @@
         <button mat-icon-button (click)="openEditModal(row.employeeId)">
             <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button>
+        <button mat-icon-button (click)="deleteEmployee(row.employeeId)">
             <mat-icon>delete</mat-icon>
         </button>
     </td>

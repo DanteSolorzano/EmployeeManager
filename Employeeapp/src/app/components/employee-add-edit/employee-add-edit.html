@@ -1,4 +1,7 @@
-<h2 mat-dialog-title>New Employee</h2>
+<h2 mat-dialog-title>
+    @if(isEditMode()){
+            Edit Employee
+    } @else {New Employee}</h2>
 
 <mat-dialog-content>
     <!-- Cuadrícula responsiva: 1 columna en móviles, 2 columnas en pantallas más grandes -->

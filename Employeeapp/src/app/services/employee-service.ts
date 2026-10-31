@@ -14,7 +14,7 @@ export class EmployeeService {
     } 
 
     getbyId(id:number): Observable<GetEmployeeResponse>{
-        return this.http.get<GetEmployeeResponse>(`${this.endPoint}/getById/${id}`)
+        return this.http.get<GetEmployeeResponse>(`${this.endPoint}/getById?id=${id}`)
     } 
 
     create(request: CreateEmployeeRequest): Observable<void>{
@@ -45,7 +45,7 @@ export class EmployeeService {
         return this.http.put<void>(`${this.endPoint}/update`, formData)
     }
     
-    delete(id:number): Observable<void>{
-        return this.http.get<void>(`${this.endPoint}/delete/${id}`)
+    delete(employeId:number): Observable<void>{
+        return this.http.delete<void>(`${this.endPoint}/delete/${employeId}`)
     } 
 }

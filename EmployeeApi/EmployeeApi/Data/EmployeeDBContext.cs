@@ -30,6 +30,13 @@ public partial class EmployeeDBContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+
+                entity.HasData(
+                new Department { DepartmentId = 1, Name = "Technology & Development" },
+                new Department { DepartmentId = 2, Name = "Human Resources" },
+                new Department { DepartmentId = 3, Name = "Finance" },
+                new Department { DepartmentId = 4, Name = "Sales" }
+            );
         });
 
         modelBuilder.Entity<Employee>(entity =>
