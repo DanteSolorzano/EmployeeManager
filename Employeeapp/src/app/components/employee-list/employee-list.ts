@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, viewChild, AfterViewInit } from '@angular/core';
 import { MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
@@ -16,6 +16,8 @@ import { GetEmployeeResponse } from '../../interfaces/employee-dtos';
 import { EmployeeService } from '../../services/employee-service';
 import { CurrencyPipe } from '@angular/common';
 
+import Swal from 'sweetalert2'
+
 
 @Component({
   imports: [ MatButtonModule, MatIconModule, MatPaginatorModule, MatSortModule, MatTableModule, MatInputModule, MatFormFieldModule, CurrencyPipe],
@@ -23,7 +25,7 @@ import { CurrencyPipe } from '@angular/common';
   styleUrl: './employee-list.scss',
   templateUrl: './employee-list.html',
 })
-export class EmployeeList implements OnInit {
+export class EmployeeList implements OnInit, AfterViewInit {
 
   readonly dialog = inject(MatDialog);
   protected displayedColumns: string[] = ['image', 'name', 'email', 'salary' , 'department', 'actions'];
@@ -32,30 +34,31 @@ export class EmployeeList implements OnInit {
   protected employees = signal<GetEmployeeResponse[]>([]);
   protected employeeService = inject(EmployeeService);
 
+  ngOnInit(): void {
+    this.loadEmployees();
+  }
+
+  // Se asigna el paginador una vez que la vista del HTML ya cargó por completo
+  ngAfterViewInit(): void {
+    const pag = this.paginator();
+    if (pag) {
+      this.dataSource.paginator = pag;
+    }
+  }
 
   private loadEmployees(): void {
     this.employeeService.getAll().subscribe({
-      next: (data) => this.employees.set(data),
-      //next: (data) => console.log(data),
+      next: (data) => {
+        this.employees.set(data);
+        // Actualiza el DataSource directamente para forzar el renderizado en la tabla
+        this.dataSource.data = data; 
+      },
       error: (e) => {
-        console.log(e.error)
-        this.employees.set([])
+        console.log(e.error);
+        this.employees.set([]);
+        this.dataSource.data = [];
       }
-    })
-  }
-
-  constructor() {
-    effect(() => {
-      this.dataSource.data = this.employees();
-
-      if(this.paginator())
-        this.dataSource.paginator = this.paginator()
-
-    })
-  }
-
-  ngOnInit(): void {
-    this.loadEmployees()
+    });
   }
 
   applyFilter(event: Event) {
@@ -75,9 +78,8 @@ export class EmployeeList implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-        if(result) this.loadEmployees()
-    })
-
+      if(result) this.loadEmployees();
+    });
   }
 
   openEditModal(id:number):void {
@@ -86,14 +88,41 @@ export class EmployeeList implements OnInit {
       height:'auto',
       disableClose: true,
       data: { employeeId: id },
-
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-        if(result) this.loadEmployees()
-    })
-
+      if(result) this.loadEmployees();
+    });
   }
 
+  deleteEmployee(id: number): void {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+      }).then((result) => {
+        if (result.isConfirmed) {
+
+          this.employeeService.delete(id).subscribe({
+            next:() => {
+              this.loadEmployees();
+               Swal.fire({
+                title: "Deleted!",
+                text: "Your file has been deleted.",
+                icon: "success"
+          });
+            },
+            error:(e) => console.error(e.error)
+          })
+        }
+        
+        
+        
+      });
+  }
 
 }
