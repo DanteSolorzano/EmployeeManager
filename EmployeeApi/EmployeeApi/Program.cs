@@ -14,8 +14,18 @@ builder.Services.AddCors(opts =>
 {
     opts.AddPolicy("mypolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-        .AllowAnyHeader().AllowAnyMethod();
+        policy.SetIsOriginAllowed(origin => 
+        {
+            if (string.IsNullOrEmpty(origin)) return false;
+            
+            // Obtenemos solo el dominio (ej. "localhost" o "mi-app.vercel.app")
+            var host = new Uri(origin).Host; 
+            
+            // Permitimos desarrollo local y producción en Vercel
+            return host == "localhost" || host.EndsWith(".vercel.app");
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
