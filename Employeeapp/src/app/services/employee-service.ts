@@ -7,7 +7,7 @@ import { CreateEmployeeRequest, GetEmployeeResponse, UpdateEmployeeRequest } fro
 @Service()
 export class EmployeeService {
     private http = inject(HttpClient)
-    private endPoint = `${environment.apiUrl}/employee`
+    private endPoint = `${environment.apiUrl}/Employee`
 
     getAll(): Observable<GetEmployeeResponse[]>{
         return this.http.get<GetEmployeeResponse[]>(`${this.endPoint}/getAll`)
