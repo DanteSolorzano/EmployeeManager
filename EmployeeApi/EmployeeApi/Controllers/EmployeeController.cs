@@ -108,11 +108,23 @@ namespace EmployeeApi.Controllers
                 Image = fileName,
                 DepartmentId = request.DepartmentId
             };
-            await _db.Employees.AddAsync(employee);
-            await _db.SaveChangesAsync();
 
-
-            return Ok( new {message = "Employee Added Succesfully"});
+            try
+            {
+                await _db.Employees.AddAsync(employee);
+                await _db.SaveChangesAsync();
+                return Ok( new {message = "Employee Added Succesfully"});
+            } catch (DbUpdateException ex)
+            {
+                //validacion del correo unico
+                DeleteImage(fileName); 
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("duplicate key"))                
+                {
+                    return BadRequest(new { message = "The email address you entered is already in use." });
+                }
+                return StatusCode(500, new { message = "A database error occurred." });
+            }
+            
         }
 
         [HttpPut]
@@ -125,17 +137,31 @@ namespace EmployeeApi.Controllers
             employee!.Email = request.Email;
             employee!.Salary = request.Salary;
             employee!.DepartmentId = request.DepartmentId;
-
+            string oldImage = employee.Image; // Guardamos la imagen vieja por si falla
+            string newImageName = null;
             if (request.Image != null)
             {
-                DeleteImage(employee.Image);
-                employee.Image = await SaveImageAsync(request.Image);
+                newImageName = await SaveImageAsync(request.Image);
+                employee.Image = newImageName;
             }
-
-            _db.Employees.Update(employee);
+            try
+            {
+                _db.Employees.Update(employee);
                 await _db.SaveChangesAsync();
-
-               return Ok(new { message = "Employee Updated Succesfully" });
+                // Si se actualizó correctamente y había imagen nueva, borramos la vieja
+                if (request.Image != null) DeleteImage(oldImage);
+                return Ok(new { message = "Employee Updated Succesfully" });
+            }
+            catch (DbUpdateException ex)
+            {
+                // Si falla (ej. correo duplicado) y habíamos subido una imagen nueva, la borramos
+                if (newImageName != null) DeleteImage(newImageName);
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("duplicate key"))
+                {
+                    return BadRequest(new { message = "The email address you are trying to save is already in use." });
+                }
+                return StatusCode(500, new { message = "A database error occurred." });
+            }
         }
 
         [HttpDelete("{EmployeeId}")]

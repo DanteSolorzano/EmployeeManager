@@ -31,6 +31,7 @@ export class EmployeeAddEdit implements OnInit {
     departmentId: ''
   };
 
+
   protected employeeModel = signal(this.initialData);
 
   protected employeeForm = form(this.employeeModel, (field) => {
@@ -41,6 +42,8 @@ export class EmployeeAddEdit implements OnInit {
     required(field.salary);
     required(field.departmentId);
   })
+
+  protected serverEmailError = signal<string | null>(null);
 
   protected selectedFile = signal<File | null>(null)
   protected departments = signal<GetDepartmentResponse[]>([])
@@ -88,11 +91,13 @@ export class EmployeeAddEdit implements OnInit {
     }
   }
 
-  save():void {
-    const {name, lastname1, lastname2, email, salary, departmentId} =  this.employeeForm().value()
+  save(): void {
+      this.serverEmailError.set(null);
+      
+      const {name, lastname1, lastname2, email, salary, departmentId} =  this.employeeForm().value();
 
-      if(this.isEditMode()){
-          const request :UpdateEmployeeRequest = {
+      if (this.isEditMode()) {
+        const request: UpdateEmployeeRequest = {
           employeeId: this.data!.employeeId!,
           name,
           lastname1,
@@ -100,37 +105,38 @@ export class EmployeeAddEdit implements OnInit {
           email,
           salary: Number(salary),
           departmentId: Number(departmentId)
-        }
-        if(this.selectedFile()) request.image = this.selectedFile()!;
+        };
+        if (this.selectedFile()) request.image = this.selectedFile()!;
 
         this.employeeService.update(request).subscribe({
-          next: resp => this.dialogRef.close(true),
-          error: (e) => console.log(e.error)
-        })
+          next: () => this.dialogRef.close(true),
+          error: (e) => {
+            console.error(e);
+            // 2. Activamos el mensaje de error en el input (Modo Edición)
+            this.serverEmailError.set('The email address you are trying to save is already in use.');
+          }
+        });
       } else {
-        const request :CreateEmployeeRequest = {
-        name,
-        lastname1,
-        lastname2,
-        email,
-        salary: Number(salary),
-        departmentId: Number(departmentId)
-      }
-      if(this.selectedFile()) request.image = this.selectedFile()!;
+        const request: CreateEmployeeRequest = {
+          name,
+          lastname1,
+          lastname2,
+          email,
+          salary: Number(salary),
+          departmentId: Number(departmentId)
+        };
+        if (this.selectedFile()) request.image = this.selectedFile()!;
 
-      this.employeeService.create(request).subscribe({
-        next: resp => this.dialogRef.close(true),
-        error: (e) => console.log(e.error)
-      })
+        this.employeeService.create(request).subscribe({
+          next: () => this.dialogRef.close(true),
+          error: (e) => {
+            console.error(e);
+            // 3. Activamos el mensaje de error en el input (Modo Creación)
+            this.serverEmailError.set('The email address you entered is already in use.');
+          }
+        });
     }
-
   }
-
-
-
-
-
-    
 
   close():void {
     this.dialogRef.close(false)
