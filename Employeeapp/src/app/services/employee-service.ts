@@ -1,5 +1,5 @@
 import { inject, Service } from '@angular/core';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CreateEmployeeRequest, GetEmployeeResponse, UpdateEmployeeRequest } from '../interfaces/employee-dtos';
